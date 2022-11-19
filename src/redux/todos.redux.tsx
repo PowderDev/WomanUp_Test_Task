@@ -51,7 +51,7 @@ export const rootReducer = (state = initialState, action: ReduxAction) => {
 
     case ActionTypes.EDIT_TODO:
       const todoList = state.todoList;
-      const idx = todoList.findIndex((t) => t.id == action.payload.id)!;
+      const idx = todoList.findIndex((t) => t.id === action.payload.id)!;
       todoList[idx] = action.payload;
       return { todoList };
 

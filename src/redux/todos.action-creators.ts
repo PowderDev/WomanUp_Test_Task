@@ -17,9 +17,9 @@ export const updateTodoThunk = (todo: Todo) => async (dispatch: any) => {
   dispatch(updateTodo(updatedTodo));
 };
 
-export const removeTodoThunk = (id: string) => async (dispatch: any) => {
-  await firebaseDelete(id);
-  dispatch(removeTodo(id));
+export const removeTodoThunk = (todo: Todo) => async (dispatch: any) => {
+  await firebaseDelete(todo);
+  dispatch(removeTodo(todo.id));
 };
 
 export const fetchTodosThunk = (todos: Todo[]) => async (dispatch: any) => {

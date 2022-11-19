@@ -17,7 +17,9 @@ type ADD_TODO_ACTION = {
 };
 type REMOVE_TODO_ACTION = {
   type: ActionTypes.REMOVE_TODO;
-  payload: Todo;
+  payload: {
+    id: string;
+  };
 };
 
 type FETCH_TODOS_ACTION = {
@@ -36,6 +38,7 @@ export type Todo = AddTodoValues & {
   completed: boolean;
   deadline: Timestamp;
   createdAt: Timestamp;
+  filePath: string;
 };
 
 export type AddTodoValues = {

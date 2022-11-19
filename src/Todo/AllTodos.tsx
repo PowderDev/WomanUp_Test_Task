@@ -11,21 +11,20 @@ export const AllTodos = () => {
 
   const actions = useActions();
   const state = useAppSelector((state) => state);
-  const todos = state.todoList;
   const checkExpired = (todo: Todo) => todo.deadline.toDate() < new Date();
   const checkCompleted = (todo: Todo) => checkExpired(todo) || todo.completed;
   const getDeadline = (todo: Todo) =>
     dayjs.unix(todo.deadline.seconds).fromNow();
 
   const updateTodo = (todo: Todo) => actions.updateTodoThunk(todo);
-  const removeTodo = (id: Todo['id']) => actions.removeTodoThunk(id);
+  const removeTodo = (todo: Todo) => actions.removeTodoThunk(todo);
 
   return (
     <React.Fragment>
       <h3>All Todos</h3>
 
       <ul className="todos">
-        {todos?.map((todo) => (
+        {state.todoList?.map((todo) => (
           <li
             className={`todo ${checkCompleted(todo) ? 'completed' : ''}`}
             key={todo.id}
@@ -46,7 +45,7 @@ export const AllTodos = () => {
                     ? 'Uncomplete'
                     : 'Complete'}
                 </button>
-                <button onClick={() => removeTodo(todo.id)}>Remove</button>
+                <button onClick={() => removeTodo(todo)}>Remove</button>
               </div>
             </header>
 

@@ -12,7 +12,12 @@ import {
 import { AddTodoValues, Todo } from 'types/types';
 import { db, storage } from '../config';
 import { useEffect } from 'react';
-import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import {
+  getDownloadURL,
+  ref,
+  uploadBytes,
+  deleteObject,
+} from 'firebase/storage';
 import { v4 as uuid } from 'uuid';
 import { useActions } from 'redux/hooks';
 
@@ -23,13 +28,12 @@ export const useFirebaseRead = () => {
     const collectionRef = collection(db, 'todos');
     getDocs<any>(collectionRef).then((snapshot) => {
       actions.fetchTodosThunk(
-        (snapshot as QuerySnapshot<Todo>)
-          .docChanges()
-          .map((item) => ({ ...item.doc.data(), id: item.doc.id }))
+        (snapshot as QuerySnapshot<Todo>).docs
+          .map((doc) => ({ ...doc.data(), id: doc.id }))
           .sort((a, b) => (a.createdAt.seconds < b.createdAt.seconds ? 1 : 0))
       );
     });
-  }, [actions]);
+  }, []);
 };
 
 export const firebaseUpdateCompletion = async (todo: Todo) => {
@@ -40,17 +44,20 @@ export const firebaseUpdateCompletion = async (todo: Todo) => {
 };
 
 export const firebaseWrite = async (todo: AddTodoValues) => {
+  let fileUrl = '';
   let filePath = '';
 
   if (todo.file instanceof File) {
     const storageRef = ref(storage, `files/${uuid()}`);
     const snapshot = await uploadBytes(storageRef, todo.file);
-    filePath = await getDownloadURL(snapshot.ref);
+    fileUrl = await getDownloadURL(snapshot.ref);
+    filePath = snapshot.ref.fullPath;
   }
 
   const docRef = await addDoc(collection(db, 'todos/'), {
     ...todo,
-    file: filePath,
+    file: fileUrl,
+    filePath,
     deadline: Timestamp.fromDate(new Date(todo.deadline)),
     completed: false,
     createdAt: Timestamp.fromDate(new Date()),
@@ -60,6 +67,8 @@ export const firebaseWrite = async (todo: AddTodoValues) => {
   return { ...doc.data(), id: doc.id } as Todo;
 };
 
-export const firebaseDelete = (id: string) => {
-  deleteDoc(doc(db, 'todos/' + id));
+export const firebaseDelete = (todo: Todo) => {
+  const storageRef = ref(storage, todo.filePath);
+  deleteObject(storageRef);
+  deleteDoc(doc(db, 'todos/' + todo.id));
 };
